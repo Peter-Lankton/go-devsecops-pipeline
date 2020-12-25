@@ -1,12 +1,12 @@
-name: Build
+name: Build and Test
 
-# This workflow will run on main branch and on any pull requests targeting main
+# This workflow will run on master branch and on any pull requests targeting master
 on:
   push:
 	branches:
-	  - main
+	  - master
 	tags: []
-
+  pull_request:
   
 jobs:
   lint:
@@ -16,7 +16,7 @@ jobs:
 	  - name: Set up Go
 		uses: actions/setup-go@v1
 		with:
-		  go-version: 1.14
+		  go-version: 1.12
 
 	  - name: Check out code
 		uses: actions/checkout@v1
@@ -27,6 +27,27 @@ jobs:
 		  go get -u golang.org/x/lint/golint 
 		  make lint
 		  
+  test:
+	name: Test
+	runs-on: ubuntu-latest
+	steps:
+	  - name: Set up Go
+		uses: actions/setup-go@v1
+		with:
+		  go-version: 1.12
+
+	  - name: Check out code
+		uses: actions/checkout@v1
+
+	  - name: Run Unit tests.
+		run: make test-coverage
+	  
+	  - name: Upload Coverage report to CodeCov
+		uses: codecov/codecov-action@v1.0.0
+		with:
+		  token: ${{secrets.CODECOV_TOKEN}}
+		  file: ./coverage.txt
+
   build:
 	name: Build
 	runs-on: ubuntu-latest 
@@ -35,7 +56,7 @@ jobs:
 	  - name: Set up Go
 		uses: actions/setup-go@v1
 		with:
-		  go-version: 1.14
+		  go-version: 1.12
 
 	  - name: Check out code
 		uses: actions/checkout@v1
