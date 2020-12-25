@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	hi "github.com/llcranmer/GO-devsecops-pipeline"
 )
 
 func TestHome(t *testing.T) {
