@@ -5,14 +5,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	hi "github.com/llcranmer/GO-devsecops-pipeline"
 )
 
 func TestHome(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
-	hi.Home(w, r)
+	Home(w, r)
 	resp := w.Result()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
