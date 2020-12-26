@@ -32,7 +32,7 @@ jobs:
         - uses: max/secret-scan@master
   test:
     name: Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name : checkout
         uses: actions/checkout@v2
