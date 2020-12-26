@@ -32,14 +32,18 @@ jobs:
         - uses: max/secret-scan@master
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - name : checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
         with:
-          go-version: 1.14
+          go-version: '1.14'
+
       - name: run tests
         run: go test -json ./... > test.json
+
       - name: annotate tests
         if: always()
         uses: guyarb/golang-test-annotations@v0.2.0
