@@ -26,3 +26,11 @@ jobs:
 
           # Optional: show only new issues if it's a pull request. The default value is `false`.
           # only-new-issues: true
+  security:
+      runs-on: ubuntu-latest
+      steps:
+          - uses: actions/checkout@master
+          - name: Run Snyk to check for vulnerabilities
+            uses: snyk/actions/golang@master
+            env:
+                SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
