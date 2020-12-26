@@ -26,13 +26,12 @@ jobs:
 
           # Optional: show only new issues if it's a pull request. The default value is `false`.
           # only-new-issues: true
-  snyk-test:
+  gosec:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/golang@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Checkout Source
+        uses: actions/checkout@v2
+      - name: Run GoSec Security Scanner
+        uses: securego/gosec@master
         with:
-          command: test
+          args: ./...
