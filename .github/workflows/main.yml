@@ -25,7 +25,6 @@ jobs:
         uses: securego/gosec@master
         with:
           args: ./...
-          
   secretsCheck:
       runs-on: ubuntu-latest
       steps:
