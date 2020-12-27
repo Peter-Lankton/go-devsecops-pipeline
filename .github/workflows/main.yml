@@ -52,18 +52,34 @@ jobs:
         with:
           test-results: test.json
   build:
-    name: Login build and publish
+    name: Build, Scan, and Publish Image
     runs-on: ubuntu-latest
     needs: [golangci, gosec, secretsCheck, test]
     steps:
       - uses: actions/checkout@v2
-      
       - name: Build App Image
         run: docker build . --tag $IMAGE_NAME
-      
+      - uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: hi-web-app:latest
+          acs-report-enable: true
+          fail-build: true
+          severity-cutoff: medium
+      - name: Upload anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+      - name: Inspect action SARIF report
+        run: cat ${{ steps.scan.outputs.sarif }}
+    
       - name: Log into GitHub Container Registry
-        run: echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
-      
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+          
       - name: Push image to GitHub Container Registry
         run: |
           IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
