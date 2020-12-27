@@ -8,7 +8,7 @@ on:
   pull_request:
     
 env:
-  IMAGE_NAME: hi-web-app
+  IMAGE_NAME: "localbuild/go-devsecops-pipeline:latest"
 jobs:
   golangci:
     name: Lint
