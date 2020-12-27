@@ -1,4 +1,4 @@
-name: GO-devsecops-pipeline
+name: go-devsecops-pipeline
 on:
   push:
     tags:
