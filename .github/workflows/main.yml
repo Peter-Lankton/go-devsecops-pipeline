@@ -5,6 +5,9 @@ on:
       - v*
     branches:
       - main
+    paths:
+      - '!**'
+      - 'go-devsecops-pipeline/**'
   pull_request:
 jobs:
   golangci:
