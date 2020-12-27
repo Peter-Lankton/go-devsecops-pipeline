@@ -1,4 +1,4 @@
-name: hi-web-app
+name: GO-devsecops-pipeline
 on:
   push:
     tags:
