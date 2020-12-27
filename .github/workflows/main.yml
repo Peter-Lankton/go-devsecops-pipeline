@@ -61,7 +61,7 @@ jobs:
         run: docker build . --tag $IMAGE_NAME
       - uses: anchore/scan-action@v2
         with:
-          image: "$IMAGE_NAME"
+          image: hi-web-app:latest
           fail-build: true
       - name: Grype scan json results
         run: for j in `ls ./anchore-reports/*.json`; do echo "---- ${j} ----"; cat ${j}; echo; done
