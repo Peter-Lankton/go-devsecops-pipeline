@@ -84,7 +84,7 @@ jobs:
       - name: Deploy to Digital Ocean droplet via SSH action
         uses: appleboy/ssh-action@v0.1.3
         with:
-          HOST: ${{ secrets.HOST }}
+          HOST: ${{ secrets.DO_IP_ADDRESS }}
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
           envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,COMMAND
