@@ -83,8 +83,8 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
           envs: IMAGE_NAME, REGISTRY,GITHUB_SHA
           script: |
-            docker stop $(echo $IMAGE_NAME)
-            docker rm $(echo $IMAGE_NAME)
+            docker stop $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+            docker rm $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
             # Run a new container from a new image
             docker run -d \
             --restart always \
