@@ -59,11 +59,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build App Image
-        run: docker build . --tag $(echo $REGISTRY)/$(echo $IMAGE_NAME)
+        run: docker build . --tag $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest
       - uses: anchore/scan-action@v2
         id: scan
         with:
-          image: registry.digitalocean.com/hi-web-app/hi-web-app
+          image: registry.digitalocean.com/hi-web-app/hi-web-app:latest
           acs-report-enable: true
           fail-build: true
           severity-cutoff: medium
@@ -87,7 +87,7 @@ jobs:
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 600
       - name: Push image to DigitalOcean Container Registry
-        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME)
+        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest
   deploy:
     name: Deploy to Digital Ocean.
     runs-on: ubuntu-latest
@@ -109,4 +109,4 @@ jobs:
             --restart always \
             -p 8000:8000 \
             --name $(echo $IMAGE_NAME) \
-            $(echo $REGISTRY)/$(echo $IMAGE_NAME)
+            $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest
