@@ -63,7 +63,6 @@ jobs:
       - uses: anchore/scan-action@v2
         id: scan
         with:
-          image: hi-web-app:latest
           acs-report-enable: true
           fail-build: true
           severity-cutoff: medium
