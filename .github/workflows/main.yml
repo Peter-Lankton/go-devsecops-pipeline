@@ -116,4 +116,4 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
           script: |
             docker pull ghcr.io/llcranmer/go-devsecops-pipeline/hi-web-app:main
-            docker run -d -p 8000:8000 hi-web-app
+            docker run -d -p 8000:8000 hi-web-app:main
