@@ -9,7 +9,7 @@ on:
     
 env:
   IMAGE_NAME: hi-web-app
-  REGISTRY: registry.digitalocean.com/hi-web-app
+  WEB_IMAGE: ghcr.io/llcranmer/go-devsecops-pipeline/hi-web-app:main
 jobs:
   golangci:
     name: Lint
@@ -52,51 +52,63 @@ jobs:
         uses: guyarb/golang-test-annotations@v0.2.0
         with:
           test-results: test.json
-  build_and_push:
+  build:
+    name: Build, Scan, and Publish Image
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    needs: test
-  
+    needs: [golangci, gosec, secretsCheck, test]
     steps:
-      - name: Checkout master
-        uses: actions/checkout@v2
-  
-      - name: Build container image
-        run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
-  
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
+      - uses: actions/checkout@v2
+      - name: Build App Image
+        run: docker build . --tag $IMAGE_NAME
+      - uses: anchore/scan-action@v2
+        id: scan
         with:
-          token: ${{ secrets.DO_API_TOKEN }}
-  
-      - name: Log in to DigitalOcean Container Registry with short-lived credentials
-        run: doctl registry login --expiry-seconds 600
-  
-      - name: Push image to DigitalOcean Container Registry
-        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
-  
+          image: hi-web-app:latest
+          acs-report-enable: true
+          fail-build: true
+          severity-cutoff: medium
+      - name: Upload anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+      - name: Inspect action SARIF report
+        run: cat ${{ steps.scan.outputs.sarif }}
+    
+      - name: Log into GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+          
+      - name: Push image to GitHub Container Registry
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
   deploy:
+    name: Deploy to Digital Ocean.
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    needs: build_and_push
-  
+    needs: build
+    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Deploy to Digital Ocean droplet via SSH action
+      - name: Deploy image and start image on digital ocean droplet.
         uses: appleboy/ssh-action@v0.1.3
         with:
           HOST: ${{ secrets.DO_IP_ADDRESS }}
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,COMMAND
           script: |
-            # Stop running container
-            # docker stop $(echo $IMAGE_NAME)
-            # # Remove old container
-            # docker rm $(echo $IMAGE_NAME)
-            # # Run a new container from a new image
-            docker pull $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
-            docker run -d \
-            --restart always \
-            -p 8000:8000 \
-            --name $(echo $IMAGE_NAME) \
-            $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+            docer login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.CR_PAT }}
+            docker pull ghcr.io/llcranmer/go-devsecops-pipeline/hi-web-app:main
+            docker run -d -p 8000:8000 hi-web-app:main
