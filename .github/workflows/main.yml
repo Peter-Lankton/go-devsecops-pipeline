@@ -9,7 +9,7 @@ on:
     
 env:
   IMAGE_NAME: hi-web-app
-  WEB_IMAGE: ghcr.io/llcranmer/go-devsecops-pipeline/hi-web-app:main
+  REGISTRY: registry.digitalocean.com/hi-web-app
 jobs:
   golangci:
     name: Lint
@@ -73,29 +73,26 @@ jobs:
           sarif_file: ${{ steps.scan.outputs.sarif }}
       - name: Inspect action SARIF report
         run: cat ${{ steps.scan.outputs.sarif }}
+  push:
+    name: Push image to DigitalOcean Registry.
+    needs: build
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v2
     
-      - name: Log into GitHub Container Registry
-        uses: docker/login-action@v1
+      - name: Build container image
+        run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
+    
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.CR_PAT }}
-          
-      - name: Push image to GitHub Container Registry
-        run: |
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          token: ${{ secrets.DO_API_TOKEN }}
+    
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 600
+    
+      - name: Push image to DigitalOcean Container Registry
+        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
   deploy:
     name: Deploy to Digital Ocean.
     runs-on: ubuntu-latest
