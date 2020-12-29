@@ -87,7 +87,7 @@ jobs:
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 600
       - name: Push image to DigitalOcean Container Registry
-        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest
+        run: docker push $(echo $IMAGE_NAME):latest
   deploy:
     name: Deploy to Digital Ocean.
     runs-on: ubuntu-latest
