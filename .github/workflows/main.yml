@@ -80,8 +80,6 @@ jobs:
     steps:
       - name: Checkout master
         uses: actions/checkout@v2
-      - name: Build container image
-        run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -89,7 +87,7 @@ jobs:
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 600
       - name: Push image to DigitalOcean Container Registry
-        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME)
   deploy:
     name: Deploy to Digital Ocean.
     runs-on: ubuntu-latest
@@ -109,7 +107,6 @@ jobs:
             # Run a new container from a new image
             docker run -d \
             --restart always \
-            --env-file .env \
             -p 8000:8000 \
             --name $(echo $IMAGE_NAME) \
-            $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+            $(echo $REGISTRY)/$(echo $IMAGE_NAME)
