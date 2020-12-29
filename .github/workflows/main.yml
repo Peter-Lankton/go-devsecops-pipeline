@@ -113,7 +113,7 @@ jobs:
         with:
           HOST: ${{ secrets.DO_IP_ADDRESS }}
           USERNAME: ${{ secrets.USERNAME }}
-          KEY: ${{ secrets.PRIVATE_KEY }}
+          PASSWORD: ${{ secrets.PASSWORD }}
           script: |
             docker pull $WEB_IMAGE
             docker run -d -p 8000:8000 $WEB_IMAGE
