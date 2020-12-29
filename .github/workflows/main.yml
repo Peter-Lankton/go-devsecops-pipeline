@@ -102,8 +102,14 @@ jobs:
           HOST: ${{ secrets.DO_IP_ADDRESS }}
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
+          envs: IMAGE_NAME, REGISTRY,GITHUB_SHA
           script: |
-            # docker stop $(echo $IMAGE_NAME)
-            # docker rm $(echo $IMAGE_NAME)
-            docker run -d --restart always --env-file .env -p 8000:8000 --name $(echo $IMAGE_NAME)
+            docker stop $(echo $IMAGE_NAME)
+            docker rm $(echo $IMAGE_NAME)
+            # Run a new container from a new image
+            docker run -d \
+            --restart always \
+            --env-file .env \
+            -p 8000:8000 \
+            --name $(echo $IMAGE_NAME) \
             $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
