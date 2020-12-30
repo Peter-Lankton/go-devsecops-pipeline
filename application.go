@@ -12,8 +12,5 @@ func handlerFunc(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", handlerFunc)
-	err := http.ListenAndServe(":80", nil)
-	if err != nil {
-		log.Fatal("Server is not working.")
-	}
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

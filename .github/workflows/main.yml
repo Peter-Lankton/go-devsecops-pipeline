@@ -102,20 +102,31 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
   deploy:
-    name: Deploy to Digital Ocean.
-    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Deploy image and start image on digital ocean droplet.
-        uses: appleboy/ssh-action@v0.1.3
+      - uses: actions/checkout@v2
+      - name: Generate deployment package
+        run: zip -r go.zip application.go
+      
+      - name: Get timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+      
+      - name: Run string replace
+        uses: frabert/replace-string-action@master
+        id: format-time
         with:
-          HOST: ${{ secrets.DO_IP_ADDRESS }}
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          script: |
-            rm -rf app
-            git clone https://github.com/llcranmer/go-devsecops-pipeline.git app
-            cd app
-            docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.CR_PAT }}
-            docker pull ghcr.io/llcranmer/go-devsecops-pipeline/hi-web-app:main
-            docker-compose -f go-app-compose.yaml up -d
+          pattern: '[:\.]+'
+          string: "${{ steps.current-time.outputs.time }}"
+          replace-with: '-'
+          flags: 'g'
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v10
+        with:
+          aws_access_key: ${{secrets.AWS_ACCESS_GO_KEY_ID}}
+          aws_secret_key: ${{secrets.AWS_SECRET_ACCESS_GO_KEY}}
+          application_name: "godevsecops"
+          environment_name: "Godevsecops-env"
+          region: "us-east-2"
+          version_label: "godevsecops-${{ steps.format-time.outputs.replaced }}"
+          deployment_package: deploy.zip
