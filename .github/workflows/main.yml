@@ -113,8 +113,7 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
           script: |
-            scp ./go-app-compose.yaml /app
-            scp ./nginx-proxy-compose.yaml /app
+            git clone https://github.com/llcranmer/go-devsecops-pipeline.git app
             cd app
             docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.CR_PAT }}
             docker pull ghcr.io/llcranmer/go-devsecops-pipeline/hi-web-app:main
