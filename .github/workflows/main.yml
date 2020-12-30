@@ -14,6 +14,7 @@ jobs:
   golangci:
     name: Lint
     runs-on: ubuntu-latest
+    on: pull_request
     steps:
       - uses: actions/checkout@v2
       - name: golangci-lint
@@ -22,6 +23,7 @@ jobs:
           version: v1.29
   gosec:
     runs-on: ubuntu-latest
+    on: pull_request
     steps:
       - name: Checkout Source
         uses: actions/checkout@v2
@@ -31,12 +33,14 @@ jobs:
           args: ./...
   secretsCheck:
       runs-on: ubuntu-latest
+      on: pull_request
       steps:
         - uses: actions/checkout@v2
         - uses: max/secret-scan@master
   test:
     name: Test
     runs-on: ubuntu-latest
+    on: pull_request
     steps:
       - name : checkout
         uses: actions/checkout@v2
@@ -55,6 +59,7 @@ jobs:
   build:
     name: Build, Scan, and Publish Image
     runs-on: ubuntu-latest
+    on: pull_request
     needs: [golangci, gosec, secretsCheck, test]
     steps:
       - uses: actions/checkout@v2
@@ -109,8 +114,8 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
           script: |
-            scp ./go-app-compose.yaml root@${{ secrets.DO_IP_ADDRESS }}:/app
-            scp ./nginx-proxy-compose.yaml root@${{ secrets.DO_IP_ADDRESS }}:/app
+            scp ./go-app-compose.yaml /app
+            scp ./nginx-proxy-compose.yaml /app
             cd app
             docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.CR_PAT }}
             docker pull ghcr.io/llcranmer/go-devsecops-pipeline/hi-web-app:main
