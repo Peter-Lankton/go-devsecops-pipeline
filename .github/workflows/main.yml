@@ -103,6 +103,7 @@ jobs:
           docker push $IMAGE_ID:$VERSION
   deploy:
     if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Generate deployment package
