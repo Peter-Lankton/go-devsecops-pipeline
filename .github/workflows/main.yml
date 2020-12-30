@@ -12,9 +12,9 @@ env:
   WEB_IMAGE: ghcr.io/llcranmer/go-devsecops-pipeline/hi-web-app:main
 jobs:
   golangci:
+    if: github.ref != 'refs/heads/main'
     name: Lint
     runs-on: ubuntu-latest
-    on: pull_request
     steps:
       - uses: actions/checkout@v2
       - name: golangci-lint
@@ -22,8 +22,8 @@ jobs:
         with:
           version: v1.29
   gosec:
+    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
-    on: pull_request
     steps:
       - name: Checkout Source
         uses: actions/checkout@v2
@@ -32,6 +32,7 @@ jobs:
         with:
           args: ./...
   secretsCheck:
+      if: github.ref != 'refs/heads/main'
       runs-on: ubuntu-latest
       on: pull_request
       steps:
@@ -39,8 +40,8 @@ jobs:
         - uses: max/secret-scan@master
   test:
     name: Test
+    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
-    on: pull_request
     steps:
       - name : checkout
         uses: actions/checkout@v2
@@ -58,8 +59,8 @@ jobs:
           test-results: test.json
   build:
     name: Build, Scan, and Publish Image
+    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
-    on: pull_request
     needs: [golangci, gosec, secretsCheck, test]
     steps:
       - uses: actions/checkout@v2
@@ -104,7 +105,6 @@ jobs:
   deploy:
     name: Deploy to Digital Ocean.
     runs-on: ubuntu-latest
-    needs: build
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Deploy image and start image on digital ocean droplet.
