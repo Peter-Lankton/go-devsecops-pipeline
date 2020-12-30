@@ -12,7 +12,7 @@ func handlerFunc(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", handlerFunc)
-	err := http.ListenAndServe(":3000", nil)
+	err := http.ListenAndServe(":80", nil)
 	if err != nil {
 		log.Fatal("Server is not working.")
 	}
