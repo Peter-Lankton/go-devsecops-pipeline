@@ -18,9 +18,10 @@ RUN go mod download
 ## we run go build to compile the binary
 ## executable of our Go program
 RUN go build -o main .
+
 RUN chmod +x main
 
-EXPOSE 8080
+EXPOSE 5000
 ## Our start command which kicks off
 ## our newly created binary executable
 ENTRYPOINT ["./main"]
