@@ -113,6 +113,7 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
           script: |
+            rm -rf app
             git clone https://github.com/llcranmer/go-devsecops-pipeline.git app
             cd app
             docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.CR_PAT }}
