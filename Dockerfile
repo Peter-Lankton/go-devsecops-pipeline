@@ -21,7 +21,7 @@ RUN go mod download
 RUN go build -o main .
 RUN chmod +x main
 
-EXPOSE 5000
+EXPOSE 8080
 ## Our start command which kicks off
 ## our newly created binary executable
 ENTRYPOINT ["./app/main"]
