@@ -107,7 +107,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Generate deployment package
-        run: zip -r go.zip application.go
+        run: zip -r go.zip application.go go.mod
       
       - name: Get timestamp
         uses: gerred/actions/current-time@master
