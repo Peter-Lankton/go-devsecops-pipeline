@@ -107,7 +107,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Generate deployment package
-        run: zip -r go.zip application.go go.mod
+        run: zip -r files.zip Dockerfile go.mod main.go
       
       - name: Get timestamp
         uses: gerred/actions/current-time@master
@@ -126,8 +126,8 @@ jobs:
         with:
           aws_access_key: ${{secrets.AWS_ACCESS_GO_KEY_ID}}
           aws_secret_key: ${{secrets.AWS_SECRET_ACCESS_GO_KEY}}
-          application_name: "godevsecops"
-          environment_name: "Godevsecops-env"
+          application_name: "godevsecops-docker"
+          environment_name: "GodevsecopsDocker-env"
           region: "us-east-2"
           version_label: "godevsecops-${{ steps.format-time.outputs.replaced }}"
-          deployment_package: go.zip
+          deployment_package: files.zip

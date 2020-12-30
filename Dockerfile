@@ -4,6 +4,8 @@ FROM golang:1.14-alpine
 ## We create an /app directory within our
 ## image that will hold our application source
 ## files
+LABEL base.name="goDevSecOpsDocker"
+
 RUN mkdir /app
 ## We copy everything in the root directory
 ## into our /app directory
@@ -18,6 +20,8 @@ RUN go mod download
 ## executable of our Go program
 RUN go build -o main .
 RUN chmod +x main
+
+EXPOSE 5000
 ## Our start command which kicks off
 ## our newly created binary executable
-CMD ["/app/main"]
+ENTRYPOINT ["./app/main"]
