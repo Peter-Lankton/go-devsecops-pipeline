@@ -34,7 +34,6 @@ jobs:
   secretsCheck:
       if: github.ref != 'refs/heads/main'
       runs-on: ubuntu-latest
-      on: pull_request
       steps:
         - uses: actions/checkout@v2
         - uses: max/secret-scan@master
